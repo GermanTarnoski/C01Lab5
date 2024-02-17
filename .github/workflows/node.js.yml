@@ -39,4 +39,5 @@ jobs:
         run: sudo systemctl start mongod
 
       - run: npm i
+      - run: npm install jest --save-dev
       - run: npm run dev & npm test
