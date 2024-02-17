@@ -39,5 +39,4 @@ jobs:
         run: sudo systemctl start mongod
 
       - run: npm i
-      - run: npm run dev
-      - run: npm test
+      - run: npm run dev & npm test
