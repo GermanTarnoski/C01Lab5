@@ -26,5 +26,11 @@
                 uses: actions/setup-node@v3
                 with:
                   node-version: ${{ matrix.node-version }}
+              - run: sudo apt-get install mongodb
+              - run: mongod --dbpath=./data/db
               - run: npm i
+              - run: npm run dev
               - run: npm test
+
+                #example of git commit
+
