@@ -26,17 +26,32 @@
                 uses: actions/setup-node@v3
                 with:
                   node-version: ${{ matrix.node-version }}
-              - name: Install MongoDB
+              - name: Install MongoDB dependencies
                 run: |
-                          curl -L https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
-                          LATEST_MONGO_VERSION=$(. /etc/os-release && curl -L repo.mongodb.org/apt/${ID}/dists/${VERSION_CODENAME}/mongodb-org | grep -Eo '[0-9]+\.[0-9]+' | sort -V | tail -1)                          sudo systemctl start mongod
-                          (. /etc/os-release && echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/${ID} ${VERSION_CODENAME}/mongodb-org/${LATEST_MONGO_VERSION} multiverse") | sudo tee /etc/apt/sources.list.d/mongodb-org-${LATEST_MONGO_VERSION}.list
-                          sudo apt update
-                          sudo apt install mongodb-org
-                          sudo systemctl unmask mongod
-                          sudo systemctl start mongod.service
+                  sudo apt update
+                  sudo apt install -y apt-transport-https ca-certificates gnupg
+
+              - name: Add MongoDB repository key
+                run: |
+                  curl -L https://www.mongodb.org/static/pgp/server-4.4.asc | sudo gpg --batch --keyring /etc/apt/trusted.gpg.d/mongodb.gpg add -
+
+              - name: Get latest MongoDB version
+                run: |
+                  LATEST_MONGO_VERSION=$(curl -L repo.mongodb.org/apt/ubuntu/focal/mongodb-org | grep -Eo '[0-9]+\.[0-9]+' | sort -V | tail -1)
+
+              - name: Add MongoDB repository list
+                run: |
+                  echo "deb [arch=amd64,arm64] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/${LATEST_MONGO_VERSION} multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-${LATEST_MONGO_VERSION}.list
+
+              - name: Update package lists
+                run: sudo apt update
+
+              - name: Install MongoDB
+                run: sudo apt install -y mongodb-org
+
+              - name: Start MongoDB service
+                run: sudo systemctl start mongod
+
               - run: npm i
               - run: npm run dev
               - run: npm test
-
-
